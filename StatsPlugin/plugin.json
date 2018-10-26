@@ -1,0 +1,8 @@
+{
+  "name": "StatsPlugin",
+  "description": "This plugin gives statistics on findings usage, reports, etc.",
+  "link": "/StatsPlugin",
+  "enabled": true,
+  "report_view": false,
+  "admin_view": true
+}
