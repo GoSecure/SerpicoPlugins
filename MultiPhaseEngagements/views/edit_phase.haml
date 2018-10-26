@@ -1,0 +1,67 @@
+.col-md-10
+  %br
+  - if @phase
+    %h2 Edit Phase
+  - else
+    %h2 Add Phase
+  %br
+
+  %form{ :method => "post", :action => "/MultiPhase/admin/edit" }
+    - if @phase
+      %input{ :type => "hidden", :name => "phase_id", :value => "#{@phase.id}" }
+
+    %table
+      %tbody
+        %tr
+          %td
+            %label.col-md-3{ :for => "title" }
+              Title &nbsp;
+          %td
+            - if @phase
+              %input#title{ :type => "text", :name => "title", :value => "#{@phase.title}", :maxlength => 250, :required => true }
+            - else
+              %input#title{ :type => "text", :name => "title", :maxlength => 250, :required => true }
+
+        %tr
+          %td
+            %label.col-md-3{ :for => "description" }
+              Description &nbsp;
+          %td
+            - if @phase
+              %textarea#description{ :rows => 5, :type => "text", :name => "description", :maxlength => 500 }
+                - if @phase.description
+                  #{meta_markup(@phase.description)}
+            - else
+              %textarea#description{ :rows => 5, :type => "text", :name => "description", :maxlength => 500 }
+
+        %tr
+          %td
+            %label.col-md-3{ :for => "objective_template" }
+              Template Phase Objective&nbsp;
+          %td
+            - if @phase
+              %textarea#objective_template{ :rows => 5, :name => "objective_template", :maxlength => 2500 }
+                - if @phase.objective_template
+                  #{meta_markup(@phase.objective_template)}
+            - else
+              %textarea#objective_template{ :rows => 5, :name => "objective_template", :maxlength => 2500 }
+
+        %tr
+          %td
+            %label.col-md-3{ :for => "full_scope_template" }
+              Template Phase Scope&nbsp;
+          %td
+            - if @phase
+              %textarea#full_scope_template{ :rows => 5, :name => "full_scope_template", :maxlength => 2500 }
+                - if @phase.full_scope_template
+                  #{meta_markup(@phase.full_scope_template)}
+            - else
+              %textarea#full_scope_template{ :rows => 5, :name => "full_scope_template", :maxlength => 2500 }
+
+    %br
+    - if @phase
+      %input.btn.btn-default{ :type => "submit", :value => "Edit" }
+    - else
+      %input.btn.btn-default{ :type => "submit", :value => "Add" }
+    %a.btn.btn-default{ :href => "/MultiPhase/admin" }
+      Cancel

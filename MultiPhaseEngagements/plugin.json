@@ -1,0 +1,8 @@
+{
+  "name": "MultiPhaseEngagements",
+  "description": "This plugin allows for grouping of the findings into multiple engagement \"phases\".",
+  "link": "/MultiPhase",
+  "enabled": true,
+  "report_view": true,
+  "admin_view": true
+}

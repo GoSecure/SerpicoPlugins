@@ -1,0 +1,40 @@
+.col-md-10
+  %br
+  %h2 Engagement Phases
+  %br
+
+  %form{:method => 'post', :action => '/MultiPhase/add'}
+  %table.table-striped#mytable{ :style => "width: 80%" }
+    %thead
+      %tr
+        %th{ :style => "width: 80%" }
+          Phase Name
+        %th{ :style => "width: 20%" }
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Actions
+    - if @report_phases.size > 0
+      %tbody
+        - @report_phases.each do |report_phase|
+          %tr
+            %td
+              #{@all_phases.find{|obj| obj.id == report_phase.phase_id}.title}
+            %td
+              %a.btn.btn-warning{ :href => "/MultiPhase/edit?report_id=#{@report_id}&phase_id=#{report_phase.phase_id}" }
+                %i.icon-pencil.icon-white{ :title => "Edit" }
+              %a.btn.btn-success{ :href => "/MultiPhase/findings?report_id=#{@report_id}&phase_id=#{report_phase.phase_id}" }
+                %i.icon-plus.icon-white{ :title => "Manage Phase Findings" }
+              %a.btn.btn-danger{ :href => "/MultiPhase/delete?report_id=#{@report_id}&deleted_phase_id=#{report_phase.phase_id}" }
+                %i.icon-remove.icon-white{ :title => "Delete" }
+
+              - if report_phase.phase_order != 1 && @report_phases.length > 1
+                %a.btn.btn-inverse{ :href => "/MultiPhase/MoveUp?report_id=#{@report_id}&phase_id=#{report_phase.phase_id}" }
+                  %i.icon-arrow-up.icon-white{ :title => "Move Up" }
+
+              - if report_phase.phase_order != @last_sort_order && @report_phases.length > 1
+                %a.btn.btn-inverse{ :href => "/MultiPhase/MoveDown?report_id=#{@report_id}&phase_id=#{report_phase.phase_id}" }
+                  %i.icon-arrow-down.icon-white{ :title => "Move Down" }
+
+  %br
+  %a.btn.btn-default{ :href => "/MultiPhase/edit?report_id=#{@report_id}" }
+    Add New Phase
+  %a.btn.btn-default{ :href => "/report/#{@report_id}/edit" }
+    Cancel

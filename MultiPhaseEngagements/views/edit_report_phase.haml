@@ -1,0 +1,142 @@
+.col-md-10
+  %br
+  - if @phase
+    %h2 Edit Report Phase
+  - else
+    %h2 Add Report Phase
+  %br
+
+  %form{ :method => "post", :action => "/MultiPhase/edit" }
+    %input{ :type => "hidden", :name => "report_id", :value => "#{@report_id}" }
+
+    %table
+      %tbody
+        %tr
+          %td
+            %label.col-md-3{ :for => "title" }
+              Phase &nbsp;
+          %td
+            %select#phase_id{ :name => "phase_id" }
+              - @available_phases.each do |phase|
+                - if @phase && phase.id == @phase_id.to_i
+                  %option{ :value => "#{phase.id}", :selected => "selected" }
+                    #{phase.title}
+                - else
+                  %option{ :value => "#{phase.id}" }
+                    #{phase.title}
+
+            - @available_phases.each do |phase_template|
+              %div{ :class => "hidden", "data-phase-id" => "#{phase_template.id}", "data-template-type" => "objective" }
+                - if phase_template.objective_template
+                  #{meta_markup(phase_template.objective_template)}
+
+              %div{ :class => "hidden", "data-phase-id" => "#{phase_template.id}", "data-template-type" => "scope" }
+                - if phase_template.full_scope_template
+                  #{meta_markup(phase_template.full_scope_template)}
+
+        %tr
+          %td
+            %label.col-md-3{ :for => "timeframe" }
+              Time Frame &nbsp;
+          %td
+            - if @phase
+              %input#timeframe{ :type => "text", :placeholder => "March 17 to March 19, 2017", :name => "timeframe", :value => "#{@phase.timeframe}", :maxlength => 250, :required => true }
+            - else
+              %input#timeframe{ :type => "text", :placeholder => "March 17 to March 19, 2017", :name => "timeframe", :maxlength => 250, :required => true }
+
+        %tr
+          %td
+            %label.col-md-3{ :for => "scope_summary" }
+              Scope Summary &nbsp;
+          %td
+            - if @phase
+              %textarea#scope_summary{ :rows => 5, :type => "text", :placeholder => "192.168.2.1\r\n192.168.2.2\r\ntest.acme.com", :name => "scope_summary", :maxlength => 1000, :required => true }
+                - if @phase.scope_summary
+                  #{meta_markup(@phase.scope_summary)}
+            - else
+              %textarea#scope_summary{ :rows => 5, :type => "text", :placeholder => "192.168.2.1\r\n192.168.2.2\r\ntest.acme.com", :name => "scope_summary", :maxlength => 1000, :required => true }
+
+        %tr
+          %td
+            %label.col-md-3{ :for => "full_scope" }
+              Scope &nbsp;
+          %td
+            - if @phase
+              %textarea#full_scope{ :rows => 5, :type => "text", :name => "full_scope", :maxlength => 2500, :required => true }
+                - if @phase.full_scope
+                  #{meta_markup(@phase.full_scope)}
+            - else
+              %textarea#full_scope{ :rows => 5, :type => "text", :name => "full_scope", :maxlength => 2500, :required => true }
+
+        %tr
+          %td
+            %label.col-md-3{ :for => "objective" }
+              Objective &nbsp;
+          %td
+            - if @phase
+              %textarea#objective{ :rows => 5, :type => "text", :name => "objective", :maxlength => 2500, :required => true }
+                - if @phase.objective
+                  #{meta_markup(@phase.objective)}
+            - else
+              %textarea#objective{ :rows => 5, :type => "text", :name => "objective", :maxlength => 2500, :required => true }
+
+        %tr
+          %td
+            %label.col-md-3{ :for => "appreciation_level" }
+              Appreciation Level &nbsp;
+          %td{ :style => "width: 70%" }
+            %select#appreciation_level{ :name => "appreciation_level" }
+              - @appreciation_levels.each do |level|
+                - if @phase and @phase.appreciation_level == level
+                  %option{ :selected => "selected" } #{level}
+                - else
+                  %option #{level}
+
+        %tr
+          %td
+            %label.col-md-3{ :for => "appreciation" }
+              Appreciation &nbsp;
+          %td
+            - if @phase
+              %textarea#appreciation{ :rows => 5, :type => "text", :name => "appreciation", :maxlength => 800, :required => true }
+                - if @phase.appreciation
+                  #{meta_markup(@phase.appreciation)}
+            - else
+              %textarea#appreciation{ :rows => 5, :type => "text", :name => "appreciation", :maxlength => 800, :required => true }
+
+    %br
+    - if @phase
+      %input.btn.btn-default{ :type => "submit", :value => "Edit" }
+    - else
+      %input.btn.btn-default{ :type => "submit", :value => "Add" }
+    %a.btn.btn-default{ :href => "/MultiPhase?report_id=#{@report_id}" }
+      Cancel
+
+:javascript
+  $(document).ready(function () {
+    if ($("#phase_id option[selected]").length <= 0) {
+      updateObjectiveTemplate();
+    }
+    if ($("#phase_id option[selected]").length <= 0) {
+      updateScopeTemplate();
+    }
+  });
+
+  $("#phase_id").change(updateTemplates);
+
+  function updateTemplates() {
+    updateObjectiveTemplate();
+    updateScopeTemplate();
+  }
+
+  function updateObjectiveTemplate() {
+    var newPhaseId = $("#phase_id").val();
+    var objectiveTemplate = $("div[data-phase-id='" + newPhaseId + "'][data-template-type='objective']").text();
+    $("#objective").val($.trim(objectiveTemplate));
+  }
+
+  function updateScopeTemplate() {
+    var newPhaseId = $("#phase_id").val();
+    var scopeTemplate = $("div[data-phase-id='" + newPhaseId + "'][data-template-type='scope']").text();
+    $("#full_scope").val($.trim(scopeTemplate));
+  }
