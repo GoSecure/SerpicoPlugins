@@ -26,18 +26,6 @@ class MultiphasePluginListener < PluginListener
         description.content = @phase_info.description
         report_phase_xml << description
 
-        findings = "<findings_list>"
-        @phase_findings.each do |finding|
-          new_finding = "<finding>"
-          new_finding = new_finding + "<id>" + finding.finding_id.to_s + "</id>"
-          new_finding = new_finding + "</finding>"
-
-          findings = findings + new_finding
-        end
-        findings = findings + "</findings_list>"
-
-        report_phase_xml.last_element_child.after(findings)
-
         multiphase_output = multiphase_output + meta_markup_unencode(report_phase_xml.to_xml, report_object)
       end
     }

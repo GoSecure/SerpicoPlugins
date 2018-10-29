@@ -19,14 +19,28 @@ get '/MultiPhase' do
 
         @report_id = report_id
 
-      	DataMapper.repository(:phases) {
-          @report_phases = ReportPhase.all(report_id: report_id, order: [:phase_order.asc])
+        @all_findings_phases = Findings.all(:report_id => report_id).map(&:assessment_type)
 
-          @last_sort_order = ReportPhase.max(:phase_order)
+      	DataMapper.repository(:phases) {
+
+          @last_sort_order = ReportPhase.max(:phase_order, :conditions => ["report_id = ?", report_id])
 
           if !@last_sort_order
             @last_sort_order = 0
           end
+
+          @all_findings_phases.each{ |phase|
+            engagement_phase = EngagementPhase.first(:title => phase, :language => report.language)
+            if engagement_phase
+              report_phase = ReportPhase.first(:report_id => report_id, :phase_id => engagement_phase.id)
+              if !report_phase
+                ReportPhase.create(:report_id => report_id, :phase_id => engagement_phase.id, :phase_order => (@last_sort_order+1),
+                  :full_scope => engagement_phase.full_scope_template, :objective => engagement_phase.objective_template)
+              end
+            end
+          }
+
+          @report_phases = ReportPhase.all(report_id: report_id, order: [:phase_order.asc])
 
           @all_phases = EngagementPhase.all(:language => report.language)
           @available_phases = EngagementPhase.all(:language => report.language)
@@ -50,7 +64,7 @@ post '/MultiPhase/add' do
         return 'No Such Report' if report.nil?
 
       	DataMapper.repository(:phases) {
-          @last_sort_order = ReportPhase.max(:phase_order)
+          @last_sort_order = ReportPhase.max(:phase_order, :conditions => ["report_id = ?", report_id])
 
           if !@last_sort_order
             @last_sort_order = 0
@@ -191,90 +205,10 @@ post '/MultiPhase/edit' do
           if @report_phase
             @report_phase.update(:objective => objective, :scope_summary => scope_summary, :full_scope => full_scope, :timeframe => timeframe,
               :appreciation_level => appreciation_level, :appreciation => appreciation)
-          else
-            @last_sort_order = ReportPhase.max(:phase_order)
-
-            if !@last_sort_order
-              @last_sort_order = 0
-            end
-
-            @report_phase = ReportPhase.create(:report_id => report_id, :phase_id => phase_id, :objective => objective,
-              :scope_summary => scope_summary, :full_scope => full_scope, :timeframe => timeframe, :appreciation_level => appreciation_level,
-              :appreciation => appreciation, :phase_order => (@last_sort_order+1))
           end
         }
 
         redirect to("/MultiPhase?report_id=" + report_id)
-end
-
-get '/MultiPhase/findings' do
-        redirect to("/") unless valid_session?
-
-      	report_id = params[:report_id]
-        phase_id = params[:phase_id]
-
-        # Query for the first report matching the id
-        report = get_report(report_id)
-        return 'No Such Report' if report.nil?
-
-        @report_id = report_id
-        @phase_id = phase_id
-
-      	DataMapper.repository(:phases) {
-          @phase = EngagementPhase.first(:id => phase_id)
-          @report_phase = ReportPhase.first(:report_id => report_id, :phase_id => phase_id)
-          @phase_findings = ReportPhaseFinding.all(:report_phase_id => @report_phase.id)
-        }
-
-        @all_findings = Findings.all(report_id: report_id)
-        @available_findings = Findings.all(report_id: report_id)
-        if @phase_findings.length > 0
-          @available_findings.delete_if {|obj| @phase_findings.map{|obj| obj.finding_id}.include? obj.id}
-        end
-
-        haml :'../plugins/MultiPhaseEngagements/views/phase_findings'
-end
-
-post '/MultiPhase/findings/add' do
-        redirect to("/") unless valid_session?
-
-        data = request.POST
-      	report_id = data['report_id']
-        phase_id = data['phase_id']
-        finding_id = data['finding_id']
-
-        # Query for the first report matching the id
-        report = get_report(report_id)
-        return 'No Such Report' if report.nil?
-
-      	DataMapper.repository(:phases) {
-          @report_phase = ReportPhase.first(:report_id => report_id, :phase_id => phase_id)
-          @phase_findings = ReportPhaseFinding.create(:report_phase_id => @report_phase.id, :finding_id => finding_id)
-        }
-
-        @findings = Findings.all(report_id: report_id)
-
-        redirect to("/MultiPhase/findings?report_id=" + report_id + "&phase_id=" + phase_id)
-end
-
-get '/MultiPhase/findings/delete' do
-        redirect to("/") unless valid_session?
-
-      	report_id = params['report_id']
-        phase_id = params['phase_id']
-        finding_id = params['finding_id']
-
-        # Query for the first report matching the id
-        report = get_report(report_id)
-        return 'No Such Report' if report.nil?
-
-      	DataMapper.repository(:phases) {
-          @report_phase = ReportPhase.first(:report_id => report_id, :phase_id => phase_id)
-          @phase_findings = ReportPhaseFinding.first(:report_phase_id => @report_phase.id, :finding_id => finding_id)
-          @phase_findings.destroy
-        }
-
-        redirect to("/MultiPhase/findings?report_id=" + report_id + "&phase_id=" + phase_id)
 end
 
 # Phases administration
@@ -297,9 +231,19 @@ get '/MultiPhase/admin/edit' do
 
       	DataMapper.repository(:phases) {
           @phase = EngagementPhase.first(:id => phase_id)
-        }
 
-        @languages = Config['languages']
+          # We fetch the assessments phases descriptions we have not filled out yet
+          @assessment_types = settings.assessment_types.map{ |type|
+            @assessment_languages = EngagementPhase.all(:title => type).map(&:language)
+            remaining_languages = Config['languages'].select{ |language|
+              (@phase and @phase.title == type and @phase.language == language) or !@assessment_languages.include?(language)
+            }
+
+            if remaining_languages and remaining_languages.count > 0
+              {type => remaining_languages}
+            end
+          }.compact
+        }
 
         haml :'../plugins/MultiPhaseEngagements/views/edit_phase'
 end

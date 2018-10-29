@@ -20,8 +20,6 @@
             %td
               %a.btn.btn-warning{ :href => "/MultiPhase/edit?report_id=#{@report_id}&phase_id=#{report_phase.phase_id}" }
                 %i.icon-pencil.icon-white{ :title => "Edit" }
-              %a.btn.btn-success{ :href => "/MultiPhase/findings?report_id=#{@report_id}&phase_id=#{report_phase.phase_id}" }
-                %i.icon-plus.icon-white{ :title => "Manage Phase Findings" }
               %a.btn.btn-danger{ :href => "/MultiPhase/delete?report_id=#{@report_id}&deleted_phase_id=#{report_phase.phase_id}" }
                 %i.icon-remove.icon-white{ :title => "Delete" }
 

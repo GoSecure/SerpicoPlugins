@@ -15,25 +15,21 @@
         %tr
           %td
             %label.col-md-3{ :for => "title" }
-              Title &nbsp;
+              Assessment Type &nbsp;
           %td
-            - if @phase
-              %input#title{ :type => "text", :name => "title", :value => "#{@phase.title}", :maxlength => 250, :required => true }
-            - else
-              %input#title{ :type => "text", :name => "title", :maxlength => 250, :required => true }
+            %select#title{ :name => "title" }
+              - @assessment_types.each do |type|
+                - if @phase and type.keys[0] == @phase.title
+                  %option{ :selected => "selected" } #{type.keys[0]}
+                - else
+                  %option #{type.keys[0]}
 
-        - if @languages and @languages.size > 1
-          %tr
-            %td
-              %label.col-md-3{ :for => "language" }
-                Language &nbsp;
-            %td
-              %select#language{ :name => "language" }
-                - @languages.each do |type|
-                  - if @phase and @phase.language == type
-                    %option{ :selected => "selected" } #{type}
-                  - else
-                    %option #{type}
+        %tr
+          %td
+            %label.col-md-3{ :for => "language" }
+              Language &nbsp;
+          %td
+            %select#language{ :name => "language" }
 
         %tr
           %td
@@ -78,3 +74,38 @@
       %input.btn.btn-default{ :type => "submit", :value => "Add" }
     %a.btn.btn-default{ :href => "/MultiPhase/admin" }
       Cancel
+
+:javascript
+  var assessment_types = #{@assessment_types.to_json};
+
+  function findLanguagesByAssessmentType(type) {
+    for (var index in assessment_types) {
+      if (assessment_types[index][type])
+        return assessment_types[index][type];
+    }
+
+    return "";
+  }
+
+  function updateLanguages(val) {
+    var languages = findLanguagesByAssessmentType($("#title").val());
+    $("#language").html("");
+    for (var index in languages) {
+      var newElement = document.createElement("option");
+      newElement.innerText = languages[index];
+
+      $("#language").append(newElement);
+    }
+
+    if (val instanceof String)
+      $("#language").val(val);
+  }
+
+  $("#title").change(updateLanguages);
+
+- if @phase and @phase.language
+  :javascript
+    updateLanguages(#{@phase.language.to_json});
+- else
+  :javascript
+    updateLanguages();

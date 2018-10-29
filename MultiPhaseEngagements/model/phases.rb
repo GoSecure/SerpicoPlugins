@@ -25,12 +25,12 @@ class ReportPhase
     property :report_id, Integer, required: true
     property :phase_id, Integer, required: true
     property :phase_order, Integer, required: true
-    property :scope_summary, String, required: true, length: 1000
-    property :full_scope, String, required: true, length: 2500
-    property :objective, String, required: true, length: 2500
-    property :timeframe, String, required: true, length: 250
-    property :appreciation_level, String, required: true, length: 150
-    property :appreciation, String, required: true, length: 800
+    property :scope_summary, String, required: false, length: 1000
+    property :full_scope, String, required: false, length: 2500
+    property :objective, String, required: false, length: 2500
+    property :timeframe, String, required: false, length: 250
+    property :appreciation_level, String, required: false, length: 150
+    property :appreciation, String, required: false, length: 800
 end
 
 class ReportPhaseFinding
