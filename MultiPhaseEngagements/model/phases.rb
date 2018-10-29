@@ -14,6 +14,8 @@ class EngagementPhase
     property :description, String, required: false, length: 500
     property :objective_template, String, required: false, length: 2500
     property :full_scope_template, String, required: false, length: 2500
+
+    property :language, String, required: false
 end
 
 class ReportPhase

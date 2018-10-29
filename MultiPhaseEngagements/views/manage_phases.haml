@@ -10,12 +10,16 @@
           %th{ :style => "width: 60%" }
             Phase Title
           %th{ :style => "width: 20%" }
+            Language
+          %th{ :style => "width: 20%" }
       %tbody
         - @phases.each do |phase|
           %tr
-            %td{ :style => "width: 80%" }
+            %td
               #{phase.title}
-            %td{ :style => "width: 20%" }
+            %td
+              #{phase.language}
+            %td
               %div{ :style => "float: right" }
                 %a.btn.btn-warning{ :href => "/MultiPhase/admin/edit?phase_id=#{phase.id}" }
                   %i.icon-pencil.icon-white{ :title => "Edit" }

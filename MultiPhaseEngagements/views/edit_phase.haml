@@ -22,6 +22,19 @@
             - else
               %input#title{ :type => "text", :name => "title", :maxlength => 250, :required => true }
 
+        - if @languages and @languages.size > 1
+          %tr
+            %td
+              %label.col-md-3{ :for => "language" }
+                Language &nbsp;
+            %td
+              %select#language{ :name => "language" }
+                - @languages.each do |type|
+                  - if @phase and @phase.language == type
+                    %option{ :selected => "selected" } #{type}
+                  - else
+                    %option #{type}
+
         %tr
           %td
             %label.col-md-3{ :for => "description" }

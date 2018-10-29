@@ -28,14 +28,14 @@ get '/MultiPhase' do
             @last_sort_order = 0
           end
 
-          @all_phases = EngagementPhase.all()
-          @available_phases = EngagementPhase.all()
+          @all_phases = EngagementPhase.all(:language => report.language)
+          @available_phases = EngagementPhase.all(:language => report.language)
           if @report_phases.length > 0
             @available_phases.delete_if {|obj| @report_phases.map{|obj| obj.phase_id}.include? obj.id}
           end
         }
 
-        haml :'../plugins/MultiPhaseEngagements/views/report_phases', :encode_html => true
+        haml :'../plugins/MultiPhaseEngagements/views/report_phases'
 end
 
 post '/MultiPhase/add' do
@@ -150,7 +150,7 @@ get '/MultiPhase/edit' do
             @all_report_phases = @all_report_phases - @phase
           end
 
-          @available_phases = EngagementPhase.all()
+          @available_phases = EngagementPhase.all(:language => report.language)
           if @all_report_phases && @all_report_phases.length > 0
             @available_phases.delete_if {|obj| @all_report_phases.map{|obj| obj.phase_id}.include? obj.id}
           end
@@ -164,7 +164,7 @@ get '/MultiPhase/edit' do
           @available_findings.delete_if {|obj| @phase_findings.map{|obj| obj.finding_id}.include? obj.id}
         end
 
-        haml :'../plugins/MultiPhaseEngagements/views/edit_report_phase', :encode_html => true
+        haml :'../plugins/MultiPhaseEngagements/views/edit_report_phase'
 end
 
 post '/MultiPhase/edit' do
@@ -232,7 +232,7 @@ get '/MultiPhase/findings' do
           @available_findings.delete_if {|obj| @phase_findings.map{|obj| obj.finding_id}.include? obj.id}
         end
 
-        haml :'../plugins/MultiPhaseEngagements/views/phase_findings', :encode_html => true
+        haml :'../plugins/MultiPhaseEngagements/views/phase_findings'
 end
 
 post '/MultiPhase/findings/add' do
@@ -286,7 +286,7 @@ get '/MultiPhase/admin' do
           @phases = EngagementPhase.all()
         }
 
-        haml :'../plugins/MultiPhaseEngagements/views/manage_phases', :encode_html => true
+        haml :'../plugins/MultiPhaseEngagements/views/manage_phases'
 end
 
 get '/MultiPhase/admin/edit' do
@@ -299,7 +299,9 @@ get '/MultiPhase/admin/edit' do
           @phase = EngagementPhase.first(:id => phase_id)
         }
 
-        haml :'../plugins/MultiPhaseEngagements/views/edit_phase', :encode_html => true
+        @languages = Config['languages']
+
+        haml :'../plugins/MultiPhaseEngagements/views/edit_phase'
 end
 
 post '/MultiPhase/admin/edit' do
@@ -309,6 +311,7 @@ post '/MultiPhase/admin/edit' do
         data = url_escape_hash(request.POST)
         phase_id = data['phase_id']
         title = data['title']
+        language = data['language']
         description = data['description']
         objective_template = data['objective_template']
         full_scope_template = data['full_scope_template']
@@ -316,11 +319,11 @@ post '/MultiPhase/admin/edit' do
         DataMapper.repository(:phases) {
           if phase_id
               @phase = EngagementPhase.first(:id => phase_id)
-              @phase.update(:title => title, :description => description, :objective_template => objective_template,
-                :full_scope_template => full_scope_template)
+              @phase.update(:title => title, :language => language, :description => description,
+                :objective_template => objective_template, :full_scope_template => full_scope_template)
           else
-              @phase = EngagementPhase.create(:title => title, :description => description, :objective_template => objective_template,
-                :full_scope_template => full_scope_template)
+              @phase = EngagementPhase.create(:title => title, :language => language, :description => description,
+                :objective_template => objective_template, :full_scope_template => full_scope_template)
           end
         }
 
