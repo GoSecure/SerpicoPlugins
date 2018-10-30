@@ -26,6 +26,16 @@
 
         %tr
           %td
+            %label.col-md-3{ :for => "phase_name" }
+              Phase Name &nbsp;
+          %td
+            - if @phase
+              %input#phase_name{ :rows => 5, :type => "text", :name => "phase_name", :value => "#{meta_markup(@phase.phase_name)}", :required => true, :maxlength => 250 }
+            - else
+              %input#phase_name{ :rows => 5, :type => "text", :name => "phase_name", :required => true, :maxlength => 250 }
+
+        %tr
+          %td
             %label.col-md-3{ :for => "language" }
               Language &nbsp;
           %td

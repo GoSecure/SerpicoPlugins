@@ -255,6 +255,7 @@ post '/MultiPhase/admin/edit' do
         data = url_escape_hash(request.POST)
         phase_id = data['phase_id']
         title = data['title']
+        phase_name = data['phase_name']
         language = data['language']
         description = data['description']
         objective_template = data['objective_template']
@@ -263,10 +264,10 @@ post '/MultiPhase/admin/edit' do
         DataMapper.repository(:phases) {
           if phase_id
               @phase = EngagementPhase.first(:id => phase_id)
-              @phase.update(:title => title, :language => language, :description => description,
+              @phase.update(:title => title, :phase_name => phase_name, :language => language, :description => description,
                 :objective_template => objective_template, :full_scope_template => full_scope_template)
           else
-              @phase = EngagementPhase.create(:title => title, :language => language, :description => description,
+              @phase = EngagementPhase.create(:title => title, :phase_name => phase_name, :language => language, :description => description,
                 :objective_template => objective_template, :full_scope_template => full_scope_template)
           end
         }

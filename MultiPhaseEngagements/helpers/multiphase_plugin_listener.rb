@@ -22,6 +22,10 @@ class MultiphasePluginListener < PluginListener
         title.content = @phase_info.title
         report_phase_xml << title
 
+        phase_name = Nokogiri::XML::Node.new("phase_name", report_phase_xml)
+        phase_name.content = @phase_info.phase_name
+        report_phase_xml << phase_name
+
         description = Nokogiri::XML::Node.new("description", report_phase_xml)
         description.content = @phase_info.description
         report_phase_xml << description
