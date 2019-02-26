@@ -8,8 +8,8 @@ class SeverityGraphListener < PluginListener
     end
 
     plugin_xml = "<severitygraph>"
-    # Generate some extra XML to be added in the report if necessary
-    # if not, you can safely delete this method
+    # Todo: Generate the graph SVG and parse it as an image
+    #       then, include the image into the report
     plugin_xml << "</severitygraph>"
     return plugin_xml
   end
@@ -20,8 +20,7 @@ class SeverityGraphListener < PluginListener
       return
     end
 
-    # Cleanup the local database if necessary
-    # if not, you can safely delete this method
+    # Todo: Delete the image from disk
     return
   end
 end
