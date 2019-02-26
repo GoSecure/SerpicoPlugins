@@ -1,0 +1,205 @@
+%script{:src => "/js/d3.js"}
+
+:css
+  table.graphTable tr td {
+    vertical-align: top;
+  }
+
+  div#chart {
+    margin-left: 50px;
+  }
+
+  div#severityLevels {
+    min-width: 425px;
+    padding-bottom: 10px;
+  }
+
+  .severityLevelContainer {
+    padding-top: 10px;
+  }
+
+  div.severityLevelContainer > input, div.severityLevelContainer > label {
+    float: left;
+  }
+
+  div.severityLevelContainer > label {
+    margin-left: 6px;
+    margin-top: 0.5em;
+  }
+
+  .clear {
+    clear: both;
+  }
+
+  .severityName {
+    width: 150px;
+  }
+
+  .severityRange {
+    margin-left: 6px;
+    width: 75px;
+  }
+
+  input.severityColor {
+    margin-left: 6px;
+    height: 2em;
+    width: 2.5em;
+  }
+
+//cred to http://jsfiddle.net/ragingsquirrel3/qkHK6 for this
+:javascript
+  $(document).ready(function () {
+    refreshGraph();
+  });
+
+  function addSeverityLevel() {
+    var container = $("<div class='severityLevelContainer'></div>");
+    var name = $("<input type='text' class='severityName' placeholder='title' required='true' />");
+    var labelRangeLowerLimit = $("<label> from: </label>");
+    var rangeLowerLimit = $("<input type='number' class='severityRange' min='0' step='0.1' />");
+    var labelRangeUpperLimit = $("<label> to: </label>");
+    var rangeUpperLimit = $("<input type='number' class='severityRange' min='0' step='0.1' />");
+    var color = $("<input type='color' class='severityColor' />");
+
+    var clearFloat = $("<div class='clear'></div>");
+
+    container.append(name);
+    container.append(labelRangeLowerLimit);
+    container.append(rangeLowerLimit);
+    container.append(labelRangeUpperLimit);
+    container.append(rangeUpperLimit);
+    container.append(color);
+
+    container.append(clearFloat);
+
+    $("#severityLevels").append(container);
+
+    $("input.severityName").on("change", refreshGraph);
+    $("input.severityColor").on("change", refreshGraph);
+  }
+
+  function removeLastSeverityLevel() {
+    $("#severityLevels .severityLevelContainer:last-child").remove();
+  }
+
+  function refreshGraph() {
+    $("#chart").html("");
+    var nbSecurityLevel = $("input#nbSeverityLevels").val();
+
+    if (nbSecurityLevel > 0) {
+      var data = [];
+      var colorRange = [];
+
+      for (var index = 0; index < nbSecurityLevel; index ++) {
+        var currentElement = $("#severityLevels .severityLevelContainer")[index];
+        data.push({"label":$(currentElement).find("input.severityName").val(), "value": 1});
+        colorRange.push($(currentElement).find("input.severityColor").val());
+      }
+
+      var w = 250;
+      var h = 250;
+      var r = h/2;
+      var iw = 60;
+
+      var color = d3.scale.ordinal().range(colorRange);
+
+      var vis = d3.select('#chart').append("svg:svg").data([data]).attr("width", w).attr("height", h).append("svg:g").attr("transform", "translate(" + r + "," + r + ")");
+      var pie = d3.layout.pie().value(function(d){return d.value;});
+      var arc = d3.svg.arc().innerRadius(r - iw).outerRadius(r);
+      var arcs = vis.selectAll("g.slice").data(pie).enter().append("svg:g").attr("class", "slice");
+
+      arcs.append("svg:path")
+        .attr("fill", function(d, i){
+          return color(i);
+          })
+        .attr("stroke", "white")
+        .attr("stroke-width", 2.0)
+        .attr("d", function (d) {
+          console.log(arc(d));
+          return arc(d);
+        });
+      arcs.append("svg:text").attr("transform", function(d){
+        d.innerRadius = 0;
+        d.outerRadius = r;
+        return "translate(" + arc.centroid(d) + ")";});
+
+      var legend = d3.select("#chart").append("svg")
+        .attr("class", "legend")
+        .attr("width", r)
+        .attr("height", r * 2)
+        .selectAll("g")
+        .data(color.domain().slice())
+        .enter().append("g")
+        .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+
+      legend.append("rect")
+        .attr("width", 18)
+        .attr("height", 18)
+        .style("fill", color);
+
+      legend.append("text")
+        .attr("x", 24)
+        .attr("y", 9)
+        .attr("dy", ".35em")
+        .text(function( d,i ) {return data[i].label +": " + data[i].value })
+        .style("font-size","px");
+    }
+  }
+
+  var nbElements = $("input#nbSeverityLevels").val() || 0;
+  $(document).on("change, blur, keyup","input#nbSeverityLevels", function() {
+      var newNbElements = $("input#nbSeverityLevels").val();
+
+      if (newNbElements && newNbElements > 0 && nbElements != newNbElements) {
+        if (nbElements < newNbElements) {
+          for (var index = 0; index < (newNbElements - nbElements); index++) {
+            addSeverityLevel();
+          }
+        } else if (nbElements > newNbElements) {
+          for (var index = 0; index < (nbElements - newNbElements); index++) {
+            removeLastSeverityLevel();
+          }
+        }
+
+        nbElements = newNbElements;
+        refreshGraph();
+      }
+  });
+
+.col-md-10
+  %br
+  %h3 Manage Severity Rankings
+  %br
+
+  %form.form-horizontal{ :method => "post", :enctype => "application/x-www-form-urlencoded" }
+    %table.graphTable
+      %tr
+        %td
+          %label{ :for => "nbSeverityLevels" } Number of severity rankings
+          %input#nbSeverityLevels{ :type => "number", :name => "nbSeverityLevels", :min => 1 }
+
+          %br
+
+          %div#severityLevels
+            - if @severityLevels
+              - @severityLevels.each do |level|
+                %div.severityLevelContainer
+                  %input.severityName{ :type => "text", placeholder => "title", required => "true" }
+                  %label from:
+                  %input.severityRange{ :type => "number", :min => "0", :step => "0.1" }
+                  %label to:
+                  %input.severityRange{ :type => "number", :min => "0", :step => "0.1" }
+                  %input.severityColor{ :type => "color" }
+                  %div.clear
+          // The following section will be generated for every new severity level
+          // %input.severityName#severityName1{ :type => "text", :name => "severityName1", :placeholder => "Title" }
+          // %input.severityRange#severityRangeLow1{ :type => "number", :name => "severityRangeLow1", :min => 0 }
+          // %input.severityRange#severityRangeHigh1{ :type => "number", :name => "severityRangeHigh1", :min => 0 }
+          // %input.severityColor#severityColor1{ :type => "color", :name => "severityColor1" }
+        %td
+          %div#chart
+
+    %br
+    %input.btn.btn-default{ :type => "submit", :value => "Save", :name => "action" }
+    %a.btn.btn-default{ :href => "/" }
+      Cancel
