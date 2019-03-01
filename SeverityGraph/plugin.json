@@ -1,8 +1,8 @@
 {
   "name": "SeverityGraph",
   "description": "This plugin allows for generation and inclusion of a findings severity graph in the report.",
-  "link":"/SeverityGraph/admin",
+  "link":"/SeverityGraph",
   "enabled": true,
-  "report_view": true,
+  "report_view": false,
   "admin_view": true
 }

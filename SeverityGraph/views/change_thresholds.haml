@@ -115,7 +115,6 @@
         .attr("stroke", "white")
         .attr("stroke-width", 2.0)
         .attr("d", function (d) {
-          console.log(arc(d));
           return arc(d);
         });
       arcs.append("svg:text").attr("transform", function(d){
